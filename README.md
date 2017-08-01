@@ -15,6 +15,6 @@ Vue.component('input-select', require('./vue-input-select.vue'))
 ## Usage
 
 ```vue
-<input-select v-model="is" :parameter="{ '0': '是', '1': '不是', '2': '不知道' }"></input-select>
+<input-select v-model="is" :parameter="{ '0': '是', '1': '不是', '2': '不知道' }" @change="onChangeFun"></input-select>
 ```
 
