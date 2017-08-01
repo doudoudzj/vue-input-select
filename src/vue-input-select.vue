@@ -1,5 +1,5 @@
 <template>
-  <div :class="innerContainerClass" :style="{'width': width + 'px'}" @click="isShow=!isShow">
+  <div :class="innerContainerClass" @click="isShow=!isShow">
     <input readonly :class="[innerInputClass, {'active': isShow}]" :value="currName"></input>
     <i :class="['vue-input-select-triangle', {'active': isShow}]"></i>
     <ul :class="innerListClass" v-show="isShow">
@@ -44,27 +44,34 @@ export default {
     },
     width: {
       type: String,
-      default: '210' // 默认宽度
+      default: '100' // 默认宽度
     },
     parameter: {
       type: Object,
-      default: {} // 下拉数据，{ key: value, key2: value2 }
+      default: {}, // 下拉数据，{ key: value, key2: value2 }
+      required: true
     },
     modelValue: {
-      type: String,
-      default: ''
+      type: String | Number, // 接收数据字符串或者数字
+      default: '',
+      required: true
     }
   },
   mounted () {
     this.initDom()
-    this.setValue(this.modelValue)
   },
   watch: {
     modelValue (val) {
       this.setValue(val) // 外部model绑定的数据变化时，更新本地数据
     },
-    currValue (val) {
+    currValue (val, oldVal) {
       this.$emit('input', val) // 本地数据变化时，更新外部model绑定的数据
+      if (val === oldVal || oldVal === '') {
+        return
+      }
+      if (val !== oldVal) {
+        this.$emit('change', val) // 本地数据变化时，同时触发onchange事件
+      }
     }
   },
   methods: {
@@ -104,6 +111,9 @@ export default {
   .vue-input-select {
     position: relative;
     display: inline-block;
+    font-size: 13px;
+    font-family: -apple-system, sans-serif, serif;
+    color: #000;
   }
   .vue-input-select * {
     box-sizing: border-box;
@@ -123,9 +133,6 @@ export default {
     outline: none;
     transition: all 0.3s ease-in-out;
     display: inline-block;
-    font-family: -apple-system, Roboto-Regular, SourceHanSansCN-Regular;
-    font-size: 13px;
-    color: #000;
     letter-spacing: 0;
   }
   .vue-input-select-input.active {
@@ -154,6 +161,7 @@ export default {
     border-bottom-left-radius: 2px;
     border-bottom-right-radius: 2px;
     box-shadow: 0 0 6px #ccc;
+    z-index: 1;
   }
   .vue-input-select-item {
     height: 28px;
@@ -167,7 +175,8 @@ export default {
   .vue-input-select-item.selected {
     background-color: #dcdcdc;
   }
-  .vue-input-select-item:hover, .vue-input-select-item.selected:hover {
+  .vue-input-select-item:hover,
+  .vue-input-select-item.selected:hover {
     background-color: #5392ff;
     color: #fff;
   }
