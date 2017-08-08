@@ -64,6 +64,9 @@ export default {
     modelValue (val) {
       this.setValue(val) // 外部model绑定的数据变化时，更新本地数据
     },
+    parameter (val) {
+      this.currName = val[this.currValue]
+    },
     currValue (val, oldVal) {
       this.$emit('input', val) // 本地数据变化时，更新外部model绑定的数据
       if (val === oldVal || oldVal === '') {
