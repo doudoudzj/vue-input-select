@@ -3,7 +3,7 @@
     <input readonly :class="[innerInputClass, {'active': isShow}]" :value="currName"></input>
     <i :class="['vue-input-select-triangle', {'active': isShow}]"></i>
     <ul :class="innerListClass" v-show="isShow">
-      <li v-for="(item, key) in parameter" :class="[innerItemClass, {'selected': currValue === key }]" @click="setValue(key)">{{item}}</li>
+      <li v-for="(item, key) in currParameter" :class="[innerItemClass, {'selected': currValue === key }]" @click="setValue(key)">{{item}}</li>
     </ul>
   </div>
 </template>
@@ -16,6 +16,7 @@ export default {
       isShow: false,
       currValue: '',
       currName: '',
+      currParameter: {},
       innerContainerClass: 'vue-input-select',
       innerInputClass: 'vue-input-select-input',
       innerListClass: 'vue-input-select-list',
@@ -42,9 +43,9 @@ export default {
       type: String,
       default: 'vue-input-select-item' // 下拉 css class
     },
-    width: {
+    emptyValue: {
       type: String,
-      default: '100' // 默认宽度
+      default: ''
     },
     parameter: {
       type: Object,
@@ -52,10 +53,11 @@ export default {
       required: true
     },
     modelValue: {
-      type: String | Number, // 接收数据字符串或者数字
-      default: '',
       required: true
     }
+  },
+  created () {
+    this.updateList(this.emptyValue, this.parameter)
   },
   mounted () {
     this.initDom()
@@ -65,7 +67,7 @@ export default {
       this.setValue(val) // 外部model绑定的数据变化时，更新本地数据
     },
     parameter (val) {
-      this.currName = val[this.currValue]
+      this.updateList(this.emptyValue, val)
     },
     currValue (val, oldVal) {
       this.$emit('input', val) // 本地数据变化时，更新外部model绑定的数据
@@ -75,12 +77,26 @@ export default {
       if (val !== oldVal) {
         this.$emit('change', val) // 本地数据变化时，同时触发onchange事件
       }
+      this.setValue(val)
+    },
+    emptyValue (val) {
+      this.updateList(val, this.parameter)
     }
   },
   methods: {
+    updateList (defaultEmptyValue, parameter) {
+      if (defaultEmptyValue && defaultEmptyValue !== '') {
+        this.currParameter[''] = defaultEmptyValue
+        Object.assign(this.currParameter, parameter)
+      } else {
+        this.currParameter = parameter
+      }
+      this.setValue(this.currValue)
+      this.$forceUpdate()
+    },
     setValue (x) {
       this.currValue = x
-      this.currName = this.parameter[x]
+      this.currName = this.currParameter[x]
     },
     initDom () {
       this.innerContainerClass = this.containerClass !== this.innerContainerClass ? (this.innerContainerClass + ' ' + this.containerClass) : this.innerContainerClass
@@ -155,7 +171,7 @@ export default {
     margin-top: -3px;
   }
   .vue-input-select-list {
-    width: 100%;
+    min-width: 100%;
     position: absolute;
     background-color: #fff;
     border-color: #dcdcdc;
