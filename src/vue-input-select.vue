@@ -2,9 +2,9 @@
   <div :class="innerContainerClass" @click="isShow=!isShow">
     <input readonly :class="[innerInputClass, {'active': isShow}]" :value="currName"></input>
     <i :class="['vue-input-select-triangle', {'active': isShow}]"></i>
-    <ul :class="innerListClass" v-show="isShow">
-      <li v-for="(item, key) in currParameter" :class="[innerItemClass, {'selected': currValue === key }]" @click="setValue(key)">{{item}}</li>
-    </ul>
+    <div :class="innerListClass" v-show="isShow" ref="itemlist" :style="listHeightStyle">
+      <div v-for="(item, key) in currParameter" :class="[innerItemClass, {'selected': currValue === key }]" @click="setValue(key)">{{item}}</div>
+    </div>
   </div>
 </template>
 
@@ -20,7 +20,8 @@ export default {
       innerContainerClass: 'vue-input-select',
       innerInputClass: 'vue-input-select-input',
       innerListClass: 'vue-input-select-list',
-      innerItemClass: 'vue-input-select-item'
+      innerItemClass: 'vue-input-select-item',
+      listHeightStyle: {}
     }
   },
   model: {
@@ -62,6 +63,11 @@ export default {
   mounted () {
     this.initDom()
   },
+  computed: {
+    list: function () {
+      return this.$refs.itemlist
+    }
+  },
   watch: {
     modelValue (val) {
       this.setValue(val) // 外部model绑定的数据变化时，更新本地数据
@@ -81,6 +87,27 @@ export default {
     },
     emptyValue (val) {
       this.updateList(val, this.parameter)
+    },
+    isShow (val) {
+      if (val) {
+        this.$nextTick(function () {
+          let that = this.$refs.itemlist
+          let s = that.getBoundingClientRect().bottom
+          let h = document.documentElement.clientHeight
+          if (s - h > 0) {
+            let ss = h - that.getBoundingClientRect().top
+            this.listHeightStyle = {
+              'overflow': 'auto',
+              'height': ss + 'px'
+            }
+          } else {
+            this.listHeightStyle = {}
+          }
+          console.log(this.$refs.itemlist.getBoundingClientRect().bottom, document.documentElement.clientHeight)
+        })
+      } else {
+        this.listHeightStyle = {}
+      }
     }
   },
   methods: {
@@ -148,7 +175,7 @@ export default {
     border-color: #dcdcdc;
     border-radius: 2px;
     padding-left: 5px;
-    padding-right: 5px;
+    padding-right: 15px;
     outline: none;
     transition: all 0.3s ease-in-out;
     display: inline-block;
@@ -176,7 +203,8 @@ export default {
     background-color: #fff;
     border-color: #dcdcdc;
     border-style: solid;
-    border-width: 0 1px 1px 1px;
+    border-width: 1px;
+    border-top: 0;
     border-bottom-left-radius: 2px;
     border-bottom-right-radius: 2px;
     box-shadow: 0 0 6px #ccc;
@@ -198,5 +226,30 @@ export default {
   .vue-input-select-item.selected:hover {
     background-color: #5392ff;
     color: #fff;
+  }
+  .vue-input-select-list::-webkit-scrollbar {
+    width: 16px;
+    height: 14px;
+    background: transparent;
+  }
+  .vue-input-select-list::-webkit-scrollbar-track {
+    border-radius: 999px;
+    border: 5px solid transparent;
+  }
+  .vue-input-select-list::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, .2);
+    border-radius: 999px;
+    border: 5px solid transparent;
+    min-height: 20px;
+    background-clip: content-box;
+  }
+  .vue-input-select-list::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(139, 139, 139, 0.73);
+  }
+  .vue-input-select-list::-webkit-scrollbar-thumb:active {
+    background-color: rgb(139, 139, 139);
+  }
+  .vue-input-select-list::-webkit-scrollbar-corner {
+    background-color: rgba(139, 139, 139, 0.73);
   }
 </style>

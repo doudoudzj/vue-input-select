@@ -1,7 +1,8 @@
 
 ## Todolist
 
-- [ ] width and height adaptive
-- [ ] auto scroll bar
-
+- [ ] width adaptive
+- [x] height adaptive
+- [ ] auto scroll-x bar
+- [x] auto scroll-y bar
 
