@@ -3,7 +3,10 @@
     <input readonly :class="[innerInputClass, {'active': isShow}]" :value="currName"></input>
     <i :class="['vue-input-select-triangle', {'active': isShow}]"></i>
     <div :class="innerListClass" v-show="isShow" ref="itemlist" :style="listHeightStyle">
-      <div v-for="(item, key) in currParameter" :class="[innerItemClass, {'selected': currValue === key }]" @click="setValue(key)">{{item}}</div>
+      <div @click="setValue(item.value)" v-for="(item, index) of currParameter"
+      :class="[innerItemClass, {'selected': currValue === item.value.toString() }]">
+        {{item.name}}
+      </div>
     </div>
   </div>
 </template>
@@ -14,9 +17,9 @@ export default {
   data () {
     return {
       isShow: false,
-      currValue: '',
+      currValue: '', // 最终传的值
       currName: '',
-      currParameter: {},
+      currParameter: [{value: '', name: ''}],
       innerContainerClass: 'vue-input-select',
       innerInputClass: 'vue-input-select-input',
       innerListClass: 'vue-input-select-list',
@@ -49,8 +52,8 @@ export default {
       default: ''
     },
     parameter: {
-      type: Object,
-      default: {}, // 下拉数据，{ key: value, key2: value2 }
+      type: Array,
+      default: [], // 下拉数据，{ key: value, key2: value2 }
       required: true
     },
     modelValue: {
@@ -59,9 +62,11 @@ export default {
   },
   created () {
     this.updateList(this.emptyValue, this.parameter)
+    this.setValue(this.modelValue)
   },
   mounted () {
     this.initDom()
+    this.setName(this.modelValue)
   },
   computed: {
     list: function () {
@@ -70,20 +75,21 @@ export default {
   },
   watch: {
     modelValue (val) {
-      this.setValue(val) // 外部model绑定的数据变化时，更新本地数据
+      this.setValue(val)
+      this.setName(val)
     },
     parameter (val) {
       this.updateList(this.emptyValue, val)
     },
     currValue (val, oldVal) {
+      this.setName(val)
       this.$emit('input', val) // 本地数据变化时，更新外部model绑定的数据
-      if (val === oldVal || oldVal === '') {
+      if (val === oldVal || oldVal === '' || val === this.modelValue) {
         return
       }
       if (val !== oldVal) {
         this.$emit('change', val) // 本地数据变化时，同时触发onchange事件
       }
-      this.setValue(val)
     },
     emptyValue (val) {
       this.updateList(val, this.parameter)
@@ -103,7 +109,6 @@ export default {
           } else {
             this.listHeightStyle = {}
           }
-          console.log(this.$refs.itemlist.getBoundingClientRect().bottom, document.documentElement.clientHeight)
         })
       } else {
         this.listHeightStyle = {}
@@ -113,17 +118,29 @@ export default {
   methods: {
     updateList (defaultEmptyValue, parameter) {
       if (defaultEmptyValue && defaultEmptyValue !== '') {
-        this.currParameter[''] = defaultEmptyValue
-        Object.assign(this.currParameter, parameter)
+        this.currParameter = [{ value: '', name: defaultEmptyValue }]
+        if (parameter) {
+          for (let item of parameter) {
+            this.currParameter.push(item)
+          }
+        }
       } else {
         this.currParameter = parameter
       }
       this.setValue(this.currValue)
+      this.setName(this.currName)
       this.$forceUpdate()
     },
     setValue (x) {
-      this.currValue = x
-      this.currName = this.currParameter[x]
+      this.currValue = x.toString()
+    },
+    setName (x) {
+      let that = this
+      this.currParameter.map(function (item) {
+        if (item.value === x) {
+          that.currName = item.name
+        }
+      })
     },
     initDom () {
       this.innerContainerClass = this.containerClass !== this.innerContainerClass ? (this.innerContainerClass + ' ' + this.containerClass) : this.innerContainerClass

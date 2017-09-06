@@ -17,43 +17,43 @@ Vue.component('input-select', require('./vue-input-select.vue'))
 Variable in tag
 ```vue
 <input-select
-  v-model="isShowList"
-  parameter="{ '0': 'YES', '1': 'NO', '2': 'UNKNOWN' }"
-  @change="onChangeFun"
-  :empty-value="this.$t('CHOOSE')">
+  v-model="valueSelected" @change="onChangeFun" :empty-value="this.$t('CHOOSE')"
+  parameter="[
+  {value: '0', name: 'YES'},
+  {value: '1', name: 'NO'},
+  {value: '2', name: 'UNKNOWN'}]">
 </input-select>
 ```
 Reference variable
 ```vue
 <template>
-  <input-select
-    v-model="isShowList"
-    :parameter="parameter"
+  <input-select v-model="valueSelected"
     @change="onChangeFun"
+    :parameter="parameter"
     :empty-value="defaultValue">
   </input-select>
 </template>
 export default {
   data () {
     return {
-      parameter: {
-        'a': 'YES',
-        'b': 'NO',
-        'c': 'UNKNOWN'
-      },
-      isShowList: false,
+      parameter: [
+        {value: 'a', name: 'YES'},
+        {value: 'b', name: 'NO'},
+        {value: 'c', name: 'UNKNOWN'}
+      ],
+      valueSelected: 'c',
       defaultValue: 'Select item'
     }
   }
 }
 ```
 
-## Options
+## Option
 
-| item        | description                       | required |
-| ----------- | --------------------------------- | -------- |
-| v-model     | true or false to show option list | yes      |
-| parameter   | options for select list           | yes      |
-| empty-value | the default first select option   | no       |
-| @change     | Callback custom variable          | no       |
+| item        | description                     | required | type     |
+| ----------- | ------------------------------- | -------- | -------- |
+| v-model     | the value selected              | yes      | String   |
+| parameter   | options for select list         | yes      | Array    |
+| empty-value | the default first select option | no       | String   |
+| @change     | custom callback variable        | no       | Function |
 
