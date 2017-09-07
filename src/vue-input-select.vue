@@ -100,18 +100,7 @@ export default {
     isShow (val) {
       if (val) {
         this.$nextTick(function () {
-          let that = this.$refs.itemlist
-          let s = that.getBoundingClientRect().bottom
-          let h = document.documentElement.clientHeight
-          if (s - h > 0) {
-            let ss = h - that.getBoundingClientRect().top
-            this.listHeightStyle = {
-              'overflow': 'auto',
-              'height': ss + 'px'
-            }
-          } else {
-            this.listHeightStyle = {}
-          }
+          this.updateListSize()
         })
       } else {
         this.listHeightStyle = {}
@@ -133,6 +122,34 @@ export default {
       this.setValue(this.currValue)
       this.setName(this.currValue)
       this.$forceUpdate()
+    },
+    updateListSize () {
+      let options = this.$refs.itemlist
+      let bottom = options.getBoundingClientRect().bottom
+      let right = options.getBoundingClientRect().right
+      let h = document.documentElement.clientHeight
+      let w = document.documentElement.clientWidth
+      if (bottom - h <= 0 && right - w <= 0) {
+        this.listHeightStyle = {}
+        return
+      }
+      if (bottom - h > 0) {
+        let hh = h - options.getBoundingClientRect().top
+        this.listHeightStyle = {
+          'overflow': 'auto',
+          'height': hh + 'px'
+        }
+      }
+      if (right - w > 0) {
+        let ww = w - options.getBoundingClientRect().left
+        let ss = {
+          'overflow': 'auto',
+          'width': ww + 'px'
+        }
+        let old = this.listHeightStyle
+        Object.assign(old, ss)
+        this.listHeightStyle = old
+      }
     },
     setValue (x) {
       this.currValue = x.toString()
