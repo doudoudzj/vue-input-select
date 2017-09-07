@@ -81,15 +81,18 @@ export default {
     parameter (val) {
       this.updateList(this.emptyValue, val)
     },
-    currValue (val, oldVal) {
-      this.setName(val)
-      this.$emit('input', val) // 本地数据变化时，更新外部model绑定的数据
-      if (val === oldVal || oldVal === '' || val === this.modelValue) {
-        return
-      }
-      if (val !== oldVal) {
-        this.$emit('change', val) // 本地数据变化时，同时触发onchange事件
-      }
+    currValue: {
+      handler (val, oldVal) {
+        this.setName(val)
+        this.$emit('input', val) // 本地数据变化时，更新外部model绑定的数据
+        if (String(val) === String(oldVal) || String(oldVal) === '' || String(val) === String(this.modelValue)) {
+          return
+        }
+        if (val !== oldVal) {
+          this.$emit('change', val) // 本地数据变化时，同时触发onchange事件
+        }
+      },
+      deep: true
     },
     emptyValue (val) {
       this.updateList(val, this.parameter)
@@ -128,7 +131,7 @@ export default {
         this.currParameter = parameter
       }
       this.setValue(this.currValue)
-      this.setName(this.currName)
+      this.setName(this.currValue)
       this.$forceUpdate()
     },
     setValue (x) {
@@ -137,7 +140,7 @@ export default {
     setName (x) {
       let that = this
       this.currParameter.map(function (item) {
-        if (item.value === x) {
+        if (String(item.value) === String(x)) {
           that.currName = item.name
         }
       })
